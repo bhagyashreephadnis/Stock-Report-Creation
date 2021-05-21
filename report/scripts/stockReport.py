@@ -29,37 +29,49 @@ def SAPDump(wb1):
         k += 1
 
 def WebSheets(wb1, url, filename, sheet_number):
-    # page = requests.get(url)
-    # open(filename+".xls", "wb").write(page.content)
+    page = requests.get(url)
+    open(filename+".xls", "wb").write(page.content)
 
-    # x2x = XLS2XLSX(filename+".xls")
-    # x2x.to_xlsx(filename+".xlsx")
-    # os.remove(filename+".xls")
+    x2x = XLS2XLSX(filename+".xls")
+    x2x.to_xlsx(filename+".xlsx")
+    os.remove(filename+".xls")
 
-    # wb2 = load_workbook(filename+".xlsx")
-    wb2 = load_workbook(filename)
+    wb2 = load_workbook(filename+".xlsx")
+    # wb2 = load_workbook(filename)
     ws1 = wb2.worksheets[0]
     mr = ws1.max_row
     mc = ws1.max_column
 
     ws2 = wb1.worksheets[sheet_number]
-    for i in range (1, mr + 1):
-        c = ws1.cell(row = i, column = 1)
-        if c.value is None:
-            continue
-        for j in range (1, mc + 2):
-            if j==5:
-                if i==1:
-                    ws2.cell(row = i, column = 5).value = "Concatenate"
+    if mr==2:
+        for i in range(2):
+            for j in range(1, mc+1):
+                if j==5 and i==0:
+                    ws2.cell(row = i+1, column = j).value = "Concatenate"
+                elif j>5 and i==0:
+                    ws2.cell(row = i+1, column = j).value = ws1.cell(row = i+1, column = j-1).value
                 else:
-                    c = str(ws1.cell(row = i, column = 2).value) + ws1.cell(row =i , column = 4).value
-                    ws2.cell(row = i, column = 5).value = c
-            elif j>5:
-                c = ws1.cell(row = i, column = j-1)
-                ws2.cell(row = i, column = j).value = c.value
-            else:
-                c = ws1.cell(row = i, column = j)
-                ws2.cell(row = i, column = j).value = c.value
+                    ws2.cell(row = i+1, column = j).value = ws1.cell(row = i+1, column = j).value
+        # ws2.insert_cols(5)
+        # ws2.cell(row = 1, column = 5).value = "Concatenate"
+    else:
+        for i in range (1, mr + 1):
+            c = ws1.cell(row = i, column = 1)
+            if c.value is None:
+                continue
+            for j in range (1, mc + 2):
+                if j==5:
+                    if i==1:
+                        ws2.cell(row = i, column = 5).value = "Concatenate"
+                    else:
+                        c = str(ws1.cell(row = i, column = 2).value) + ws1.cell(row =i , column = 4).value
+                        ws2.cell(row = i, column = 5).value = c
+                elif j>5:
+                    c = ws1.cell(row = i, column = j-1)
+                    ws2.cell(row = i, column = j).value = c.value
+                else:
+                    c = ws1.cell(row = i, column = j)
+                    ws2.cell(row = i, column = j).value = c.value
 
 def RRP1Copy(wb1):
     wb2 = load_workbook('report/input/rrp1.xlsx')
@@ -459,6 +471,7 @@ def ParentChildWh(wb1, index, oldindex):
         oldchildind = oldparentind
         if ws1.cell(row = i, column = 1).value > ws1.cell(row = i, column = 2).value:
             while ws2.cell(row = childind, column = 3).value != ws1.cell(row = i, column = 2).value:
+                # print(ws2.cell(row = childind, column = 3).value, ws1.cell(row = i, column = 2).value)
                 childind -= 1
                 oldchildind -= 1
         else:
@@ -504,15 +517,16 @@ def startpoint():
     # ws3 = wb1.worksheets[2]
     SAPDump(wb1)
 
-    WebSheets(wb1, "", "report/input/web_south.xlsx", 3)
-    WebSheets(wb1, "", "report/input/web_north.xlsx", 4)
-    WebSheets(wb1, "", "report/input/web_west.xlsx", 5)
-    WebSheets(wb1, "", "report/input/web_east.xlsx", 6)
+    # WebSheets(wb1, "", "report/input/web_south.xlsx", 3)
+    # WebSheets(wb1, "", "report/input/web_north.xlsx", 4)
+    # WebSheets(wb1, "", "report/input/web_west.xlsx", 5)
+    # WebSheets(wb1, "", "report/input/web_east.xlsx", 6)
+
     # web download
-    # WebSheets(wb1, "http://cpindia.win.colpal.com/hubli/scripts/dwnld_xls.asp", "web_south", 3)
-    # WebSheets(wb1, "http://cpindia.win.colpal.com/north/scripts/dwnld_xls.asp", "web_north", 4)
-    # WebSheets(wb1, "http://cpindia.win.colpal.com/despatch/scripts/dwnld_xls.asp", "web_west", 5)
-    # WebSheets(wb1, "http://cpindia.win.colpal.com/koldc/scripts/dwnld_xls.asp", "web_east", 6)
+    WebSheets(wb1, "http://cpindia.win.colpal.com/hubli/scripts/dwnld_xls.asp", "report/input/web_south", 3)
+    WebSheets(wb1, "http://cpindia.win.colpal.com/north/scripts/dwnld_xls.asp", "report/input/web_north", 4)
+    WebSheets(wb1, "http://cpindia.win.colpal.com/despatch/scripts/dwnld_xls.asp", "report/input/web_west", 5)
+    WebSheets(wb1, "http://cpindia.win.colpal.com/koldc/scripts/dwnld_xls.asp", "report/input/web_east", 6)
 
     RRP1Copy(wb1)
 

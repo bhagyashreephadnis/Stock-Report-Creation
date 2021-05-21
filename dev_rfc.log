@@ -1,0 +1,10 @@
+
+**** Log file opened at 2021-05-18 12:19:03.365650 UTC+05:30 (India Standard Time), Encoding UTF-8
+NW RFC Library: SDK variant, Release 750 Patch Level 7, Compiled on Sep 19 2020 01:34:20
+ CPIC library: 753.2020.09.14 version 3, NI library: 40, Kernel Release: 753 Patch Level 711
+ Current working directory: C:\Users\bp_bhagyashree phadn\Downloads\Stock Report Creation\stockreport, Program: python
+ Hardware: PC with Windows NT 4x AMD64 Level 6 (Mod 142 Step 9), Operating_system: Windows NT 10.0
+ Hostname: INBSPF15FSS5, IP address: 10.3.0.80, IPv6 address: fe80::781e:53e8:2c9b:40d6
+
+2021-05-18 12:19:03.366521 [02408] >> Info entry
+	Did not find config file C:\Users\bp_bhagyashree phadn\Downloads\Stock Report Creation\stockreport\sapnwrfc.ini.

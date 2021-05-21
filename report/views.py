@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from report.scripts.stockReport import startpoint
+from report.scripts.sapPws import pwsStart
 
 # Create your views here.
 def index(request):
@@ -25,11 +26,11 @@ def upload(request):
             # messages.info(request, "jhbj")
             # messages.add_message(request, messages.INFO, 'Upload both files!!!!!')
             # return render(request, "upload.html")
-        file1 = request.FILES['pwsfile']
+        # file1 = request.FILES['pwsfile']
         file2 = request.FILES['rrp1file']
-        with open('report/input/pws.xlsx', 'wb+') as destination:
-            for chunk in file1.chunks():
-                destination.write(chunk)
+        # with open('report/input/pws.xlsx', 'wb+') as destination:
+        #     for chunk in file1.chunks():
+        #         destination.write(chunk)
         with open('report/input/rrp1.xlsx', 'wb+') as destination:
             for chunk in file2.chunks():
                 destination.write(chunk)
@@ -58,8 +59,9 @@ def generator(request):
 
 def download(request):
     if request.user.is_authenticated:
-        # filename = startpoint()
-        filename = "14Apr2021.xlsx"
+        # val = pwsStart()
+        filename = startpoint()
+        # filename = "14Apr2021.xlsx"
         return render(request, "download.html", {'filename':filename})
     else:
         return redirect("/")
