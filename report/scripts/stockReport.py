@@ -1,3 +1,4 @@
+from asgiref.sync import sync_to_async
 import openpyxl
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -509,6 +510,7 @@ def ParentChildWh(wb1, index, oldindex):
             ws3.cell(row = oldparentind, column = 14).value = ws3.cell(row = oldparentind, column = 6).value + ws3.cell(row = oldparentind, column = 8).value + ws3.cell(row = oldparentind, column = 10).value - ws3.cell(row = oldparentind, column = 12).value
 
 def startpoint():
+    print('here')
     wb1 = load_workbook('report/input/Base File.xlsx')
     ws1 = wb1.active
 

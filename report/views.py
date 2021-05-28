@@ -1,9 +1,12 @@
+from report.tasks import pws_task, logic
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from report.scripts.stockReport import startpoint
 from report.scripts.sapPws import pwsStart
+from asgiref.sync import sync_to_async
+import asyncio
 
 # Create your views here.
 def index(request):
@@ -60,8 +63,11 @@ def generator(request):
 def download(request):
     if request.user.is_authenticated:
         # val = pwsStart()
-        filename = startpoint()
-        # filename = "14Apr2021.xlsx"
+        # filename = startpoint()
+        # pws_task.delay()
+        r = logic.delay()
+        # print(r.get())
+        filename = r.get()
         return render(request, "download.html", {'filename':filename})
     else:
         return redirect("/")
