@@ -1,12 +1,9 @@
-from report.tasks import pws_task, logic
+from .tasks import logic
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from report.scripts.stockReport import startpoint
-from report.scripts.sapPws import pwsStart
-from asgiref.sync import sync_to_async
-import asyncio
+from datetime import date
 
 # Create your views here.
 def index(request):
@@ -25,10 +22,10 @@ def index(request):
 
 def upload(request):
     if request.method=='POST':
-        # if len(request.FILES) == 0:
-            # messages.info(request, "jhbj")
-            # messages.add_message(request, messages.INFO, 'Upload both files!!!!!')
-            # return render(request, "upload.html")
+        if len(request.FILES) == 0:
+            messages.info(request, "jhbj")
+            # messages.add_message(request, messages.INFO, 'Upload RRP1 file')
+            return redirect(upload)
         # file1 = request.FILES['pwsfile']
         file2 = request.FILES['rrp1file']
         # with open('report/input/pws.xlsx', 'wb+') as destination:
@@ -45,30 +42,69 @@ def upload(request):
 
 def generator(request):
     if request.method=='POST':
+        variant = request.POST.get("variant", "")
         if len(request.FILES) != 0:
             file1 = request.FILES['basefile']
-            with open('report/input/Base File.xlsx', 'wb+') as destination:
-                for chunk in file1.chunks():
-                    destination.write(chunk)
-            with open('report/static/Base File.xlsx', 'wb+') as destination:
-                for chunk in file1.chunks():
-                    destination.write(chunk)
-        # filename = startpoint()
-        return redirect(download)
-    if request.user.is_authenticated:
+            if variant=="paste":
+                with open('report/input/Base File (Paste).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                with open('report/static/Base File (Paste).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                return redirect(download_paste)
+            elif variant=="brush":
+                with open('report/input/Base File (Brush).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                with open('report/static/Base File (Brush).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                return redirect(download_brush)
+            else:
+                with open('report/input/Base File (PCP).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                with open('report/static/Base File (PCP).xlsx', 'wb+') as destination:
+                    for chunk in file1.chunks():
+                        destination.write(chunk)
+                return redirect(download_other)
+        else:
+            if variant=="paste":
+                return redirect(download_paste)
+            elif variant=="brush":
+                return redirect(download_brush)
+            else:
+                return redirect(download_other)
+    elif request.user.is_authenticated:
         return render(request, "generator.html")
     else:
         return redirect("/")
 
-def download(request):
+def download_paste(request):
     if request.user.is_authenticated:
-        # val = pwsStart()
-        # filename = startpoint()
-        # pws_task.delay()
-        r = logic.delay()
-        # print(r.get())
-        filename = r.get()
-        return render(request, "download.html", {'filename':filename})
+        logic_task = logic.delay("paste")
+        task_id = logic_task.task_id
+        filename = date.today().strftime("%d%b%Y")+" (Paste).xlsx"
+        return render(request, "download.html", {'filename':filename, 'task_id':task_id})
+    else:
+        return redirect("/")
+
+def download_brush(request):
+    if request.user.is_authenticated:
+        logic_task = logic.delay("brush")
+        task_id = logic_task.task_id
+        filename = date.today().strftime("%d%b%Y")+" (Brush).xlsx"
+        return render(request, "download.html", {'filename':filename, 'task_id':task_id})
+    else:
+        return redirect("/")
+
+def download_other(request):
+    if request.user.is_authenticated:
+        logic_task = logic.delay("other")
+        task_id = logic_task.task_id
+        filename = date.today().strftime("%d%b%Y")+" (PCP).xlsx"
+        return render(request, "download.html", {'filename':filename, 'task_id':task_id})
     else:
         return redirect("/")
 

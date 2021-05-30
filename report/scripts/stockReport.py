@@ -1,16 +1,18 @@
-from asgiref.sync import sync_to_async
 import openpyxl
-from openpyxl import Workbook
 from openpyxl import load_workbook
-from openpyxl.styles import Color, PatternFill
 from openpyxl.styles.borders import Border, Side, BORDER_THIN
 from xls2xlsx import XLS2XLSX
 import datetime, os, requests
 
-def SAPDump(wb1):
+def SAPDump(wb1, variant):
     # x2x = XLS2XLSX("AUTOCAP20210217020006.XLS")
     # x2x.to_xlsx("AUTOCAP20210217020006.xlsx")
-    wb2 = load_workbook('report/input/pws.xlsx')
+    if variant=="paste":
+        wb2 = load_workbook('report/input/pws_paste.xlsx')
+    elif variant=="brush":
+        wb2 = load_workbook('report/input/pws_brush.xlsx')
+    else:
+        wb2 = load_workbook('report/input/pws_other.xlsx')
     ws1 = wb2.worksheets[0]
     mr = ws1.max_row
     mc = ws1.max_column
@@ -509,15 +511,20 @@ def ParentChildWh(wb1, index, oldindex):
             ws3.cell(row = oldparentind, column = 12).value += ws3.cell(row = oldchildind, column = 12).value
             ws3.cell(row = oldparentind, column = 14).value = ws3.cell(row = oldparentind, column = 6).value + ws3.cell(row = oldparentind, column = 8).value + ws3.cell(row = oldparentind, column = 10).value - ws3.cell(row = oldparentind, column = 12).value
 
-def startpoint():
+def startpoint(variant):
     print('here')
-    wb1 = load_workbook('report/input/Base File.xlsx')
+    if variant=="paste":
+        wb1 = load_workbook('report/input/Base File (Paste).xlsx')
+    elif variant=="brush":
+        wb1 = load_workbook('report/input/Base File (Brush).xlsx')
+    else:
+        wb1 = load_workbook('report/input/Base File (PCP).xlsx')
     ws1 = wb1.active
 
     # ws2 = wb1.worksheets[1]
 
     # ws3 = wb1.worksheets[2]
-    SAPDump(wb1)
+    SAPDump(wb1, variant)
 
     # WebSheets(wb1, "", "report/input/web_south.xlsx", 3)
     # WebSheets(wb1, "", "report/input/web_north.xlsx", 4)
@@ -542,5 +549,10 @@ def startpoint():
     ws7.delete_cols(15)
     ws7.delete_cols(15)
     filename = datetime.date.today().strftime("%d%b%Y")
-    wb1.save('report/static/'+filename+'.xlsx')
-    return filename+'.xlsx'
+    if variant=="paste":
+        wb1.save('report/static/'+filename+' (Paste).xlsx')
+    elif variant=="brush":
+        wb1.save('report/static/'+filename+' (Brush).xlsx')
+    else:
+        wb1.save('report/static/'+filename+' (PCP).xlsx')
+    return True

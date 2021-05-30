@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'report.apps.ReportConfig',
+    # 'celery',
+    'celery_progress',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -41,7 +41,7 @@
     }
     
     .container{
-        margin-top: 70px;
+        margin-top: 0px;
         
         text-align: center;
     }
@@ -136,6 +136,31 @@
     #file1{
         height: 45px;
     }
+
+    .tabs{
+        height: 100px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .tabs .nav{
+        position:absolute;
+        bottom:0;
+        color: #000;
+        top: 60px;
+    }
+
+    .nav-pills .nav-link.active{
+        background-color: #a80000;
+    }
+
+    .nav-pills a{
+        color: #a80000;
+    }
+
+    .nav-pills a:hover{
+        color: maroon;
+    }
 </style>
 
 <body>
@@ -176,47 +201,150 @@
         </form>
     </nav>
 
-    <div class="container col-md-6">
-        <br><br><p>
-            Please download and check ‘sku_mast’, ‘Warehousemaster’<br>and ‘Next months forecast’ sheets in the base file.
-        </p>
 
-        <div class="container dwncontainer">
-            <div class="row no-gutters">
-                <img src="{% static 'excel logo.png' %}" alt="" height="45px" class="xlsx col-auto">
-                <div class="col-md-7"><p class="xlsx">Base File.xlsx</p></div>
-                <form action="{% static 'Base File.xlsx' %}" method="get" class="col-md-3">
-                    <button class="btn link" type="submit">Click to Download</button>
-                </form>
-            </div>
-            
-        </div><br>
-
-        <p>
-            If any changes, upload an updated file below (.xlsx format).<br>If the base file is correct, skip this step.
-        </p>
-        <p class="help">Please do not make changes in any other sheets.</p>
-
-        <form action="generator" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class ="container dwncontainer">
-                <div class="row no-gutters">
-                    <img class="col-auto" src=" {% static 'excel logo.png' %}" height="45px" alt="">
-                    <div class="input-group mb-3 col-md-10">
-                        <input type="text" class="form-control" id="file1" aria-describedby="fileHelp" placeholder=".xlsx only" disabled>
-                        <div class="input-group-append">
-                            <input type="file" name="basefile" id="basefile" accept=".xlsx" onchange="getFileData(this);" hidden/>
-                            <label for="basefile" id="filelabel">Browse</label>
-                        </div>
-                    </div>
-                </div>
-            </div><br>
-            
-            <button type="submit" class="btn downloadbtn">Create & Download Report</button>
-        </form>
-        
+    <div class="tabs nav">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#paste">Paste</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#brush">Brush</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#other">PCP</a>
+            </li>
+        </ul>
     </div>
 
+    <div class="tab-content">
+        <div class="container col-md-6 tab-pane active" id="paste">
+            <br><p>
+                Please download and check ‘sku_mast’, ‘Warehousemaster’<br>and ‘Next months forecast’ sheets in the base file.
+            </p>
+
+            <div class="container dwncontainer">
+                <div class="row no-gutters">
+                    <img src="{% static 'excel logo.png' %}" alt="" height="45px" class="xlsx col-auto">
+                    <div class="col-md-7"><p class="xlsx">Base File (Paste).xlsx</p></div>
+                    <form action="{% static 'Base File (Paste).xlsx' %}" method="get" class="col-md-3">
+                        <button class="btn link" type="submit">Click to Download</button>
+                    </form>
+                </div>
+                
+            </div><br>
+
+            <p>
+                If any changes, upload an updated file below (.xlsx format).<br>If the base file is correct, skip this step.
+            </p>
+            <p class="help">Please do not make changes in any other sheets.</p>
+
+            <form action="generator" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class ="container dwncontainer">
+                    <div class="row no-gutters">
+                        <img class="col-auto" src=" {% static 'excel logo.png' %}" height="45px" alt="">
+                        <div class="input-group mb-3 col-md-10">
+                            <input type="text" class="form-control" id="file1" aria-describedby="fileHelp" placeholder=".xlsx only" disabled>
+                            <div class="input-group-append">
+                                <input type="file" name="basefile" id="basefile" accept=".xlsx" onchange="getFileData(this);" hidden/>
+                                <label for="basefile" id="filelabel">Browse</label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="variant" value="paste">
+                    </div>
+                </div><br>
+                
+                <button type="submit" class="btn downloadbtn">Create & Download Report</button>
+            </form>
+            
+        </div>
+
+        <!-- brush div -->
+        <div class="container col-md-6 tab-pane fade" id="brush">
+            <br><p>
+                Please download and check ‘sku_mast’, ‘Warehousemaster’<br>and ‘Next months forecast’ sheets in the base file.
+            </p>
+
+            <div class="container dwncontainer">
+                <div class="row no-gutters">
+                    <img src="{% static 'excel logo.png' %}" alt="" height="45px" class="xlsx col-auto">
+                    <div class="col-md-7"><p class="xlsx">Base File (Brush).xlsx</p></div>
+                    <form action="{% static 'Base File (Brush).xlsx' %}" method="get" class="col-md-3">
+                        <button class="btn link" type="submit">Click to Download</button>
+                    </form>
+                </div>
+                
+            </div><br>
+
+            <p>
+                If any changes, upload an updated file below (.xlsx format).<br>If the base file is correct, skip this step.
+            </p>
+            <p class="help">Please do not make changes in any other sheets.</p>
+
+            <form action="generator" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class ="container dwncontainer">
+                    <div class="row no-gutters">
+                        <img class="col-auto" src=" {% static 'excel logo.png' %}" height="45px" alt="">
+                        <div class="input-group mb-3 col-md-10">
+                            <input type="text" class="form-control" id="file1" aria-describedby="fileHelp" placeholder=".xlsx only" disabled>
+                            <div class="input-group-append">
+                                <input type="file" name="basefile" id="basefile" accept=".xlsx" onchange="getFileData(this);" hidden/>
+                                <label for="basefile" id="filelabel">Browse</label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="variant" value="brush">
+                    </div>
+                </div><br>
+                
+                <button type="submit" class="btn downloadbtn">Create & Download Report</button>
+            </form>
+            
+        </div>
+
+        <!-- other div -->
+        <div class="container col-md-6 tab-pane fade" id="other">
+            <br><p>
+                Please download and check ‘sku_mast’, ‘Warehousemaster’<br>and ‘Next months forecast’ sheets in the base file.
+            </p>
+
+            <div class="container dwncontainer">
+                <div class="row no-gutters">
+                    <img src="{% static 'excel logo.png' %}" alt="" height="45px" class="xlsx col-auto">
+                    <div class="col-md-7"><p class="xlsx">Base File (PCP).xlsx</p></div>
+                    <form action="{% static 'Base File (PCP).xlsx' %}" method="get" class="col-md-3">
+                        <button class="btn link" type="submit">Click to Download</button>
+                    </form>
+                </div>
+                
+            </div><br>
+
+            <p>
+                If any changes, upload an updated file below (.xlsx format).<br>If the base file is correct, skip this step.
+            </p>
+            <p class="help">Please do not make changes in any other sheets.</p>
+
+            <form action="generator" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class ="container dwncontainer">
+                    <div class="row no-gutters">
+                        <img class="col-auto" src=" {% static 'excel logo.png' %}" height="45px" alt="">
+                        <div class="input-group mb-3 col-md-10">
+                            <input type="text" class="form-control" id="file1" aria-describedby="fileHelp" placeholder=".xlsx only" disabled>
+                            <div class="input-group-append">
+                                <input type="file" name="basefile" id="basefile" accept=".xlsx" onchange="getFileData(this);" hidden/>
+                                <label for="basefile" id="filelabel">Browse</label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="variant" value="other">
+                    </div>
+                </div><br>
+                
+                <button type="submit" class="btn downloadbtn">Create & Download Report</button>
+            </form>
+            
+        </div>
+    </div>
 </body>
 
 <!-- First steps with Django — Celery 5.0.5 documentationdocs.celeryproject.org › stable › first-steps-with-django

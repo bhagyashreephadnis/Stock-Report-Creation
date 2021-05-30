@@ -2,7 +2,7 @@ from openpyxl.workbook import workbook
 from pyrfc import Connection, ABAPApplicationError, ABAPRuntimeError, LogonError, CommunicationError
 from openpyxl import Workbook
 
-def getPwsData():
+def getPwsData(material):
     try:
         conn = Connection(user='INBHP002', ashost='CAIapp07.esc.win.colpal.com', sysnr='07', client='321', passwd='Bdp@251299')
         print(conn.alive)
@@ -46,8 +46,94 @@ def getPwsData():
         {'SIGN':'I',  'OPTION':'EQ', 'LOW':'IN97'},
         {'SIGN':'I',  'OPTION':'EQ', 'LOW':'IN98'},
         {'SIGN':'I',  'OPTION':'EQ', 'LOW':'IN99'}]
+        
+        fm_dict = {
+            'function_name':'Z1A_PWS_INDIA',
+            'connection': conn,
+            'import_args': {
+                'IT_PLANT': plant,
+                'IT_MATERIAL': material
+            }
+        }
+        # result = conn.call("Z1A_PWS_INDIA", IT_PLANT = plant, IT_MATERIAL = material)
+        result = fm_dict['connection'].call(fm_dict['function_name'], **fm_dict['import_args'])
+        # print(result['ET_EXCELTAB'])
+        resultTable = result['ET_EXCELTAB']
 
-        material = [{'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600906'},
+        conn.close()
+    except CommunicationError:
+        print(u"Could not connect to server.")
+        raise
+    except LogonError:
+        print(u"Could not log in. Wrong credentials?")
+        raise
+    except (ABAPApplicationError, ABAPRuntimeError):
+        print(u"An error occurred.")
+        raise
+    finally:
+        conn.close()
+
+    # test dict
+    testdict = {
+        'MATNR': '0000000000AS16A1013', 'MAKTX': 'CDC TP 200+100+Tb', 'WERKS': 'IN95', 'GSBEST': '        0', 'MZUBB': '        0', 'IN_TRANSIT': '     1221', 'TOTPOTENTIAL': '        0', 'FKIMG': '        0', 
+        'LOSTSALES': ' 0', 'ON_HAND': '     4816', 'NETAVAIL': '     6037', 'ALLOC_QTY': '        0', 'BAL_TO_DESP': '        0', 'EXCESS_COV': '     6037', 'EISBE': '     1778', 'MINBE': '     5337', 'BSTMI': '     2810', 'BSTMIL': '        0'
+    }
+    # resultTable.append(testdict)
+    return resultTable
+
+# save to excel
+def saveExcel(resultTable, name):
+    wb1 = Workbook()
+    ws1 = wb1.active
+    x = 1
+    for i in range(len(resultTable)):
+        if i!=0:
+            if resultTable[i]['MATNR'].isdigit():
+                ws1.cell(row = i+1, column = 1).value = int(resultTable[i]['MATNR'])
+            else:
+                ws1.cell(row = i+1, column = 1).value = resultTable[i]['MATNR']
+            ws1.cell(row = i+1, column = 2).value = resultTable[i]['MAKTX']
+            ws1.cell(row = i+1, column = 3).value = resultTable[i]['WERKS']
+            ws1.cell(row = i+1, column = 4).value = int(resultTable[i]['GSBEST'])
+            ws1.cell(row = i+1, column = 5).value = int(resultTable[i]['MZUBB'])
+            ws1.cell(row = i+1, column = 6).value = int(resultTable[i]['IN_TRANSIT'])
+            ws1.cell(row = i+1, column = 7).value = int(resultTable[i]['TOTPOTENTIAL'])
+            ws1.cell(row = i+1, column = 8).value = int(resultTable[i]['FKIMG'])
+            ws1.cell(row = i+1, column = 9).value = int(resultTable[i]['LOSTSALES'])
+            ws1.cell(row = i+1, column = 10).value = int(resultTable[i]['ON_HAND'])
+            ws1.cell(row = i+1, column = 11).value = int(resultTable[i]['NETAVAIL'])
+            ws1.cell(row = i+1, column = 12).value = int(resultTable[i]['ALLOC_QTY'])
+            ws1.cell(row = i+1, column = 13).value = int(resultTable[i]['BAL_TO_DESP'])
+            ws1.cell(row = i+1, column = 14).value = int(resultTable[i]['EXCESS_COV'])
+            ws1.cell(row = i+1, column = 15).value = int(resultTable[i]['EISBE'])
+            ws1.cell(row = i+1, column = 16).value = int(resultTable[i]['MINBE'])
+            ws1.cell(row = i+1, column = 17).value = int(resultTable[i]['BSTMI'])
+            ws1.cell(row = i+1, column = 18).value = int(resultTable[i]['BSTMIL'])
+        else:
+            ws1.cell(row = i+1, column = 1).value = resultTable[i]['MATNR']
+            ws1.cell(row = i+1, column = 2).value = resultTable[i]['MAKTX']
+            ws1.cell(row = i+1, column = 3).value = resultTable[i]['WERKS']
+            ws1.cell(row = i+1, column = 4).value = resultTable[i]['GSBEST']
+            ws1.cell(row = i+1, column = 5).value = resultTable[i]['MZUBB']
+            ws1.cell(row = i+1, column = 6).value = resultTable[i]['IN_TRANSIT']
+            ws1.cell(row = i+1, column = 7).value = resultTable[i]['TOTPOTENTIAL']
+            ws1.cell(row = i+1, column = 8).value = resultTable[i]['FKIMG']
+            ws1.cell(row = i+1, column = 9).value = resultTable[i]['LOSTSALES']
+            ws1.cell(row = i+1, column = 10).value = resultTable[i]['ON_HAND']
+            ws1.cell(row = i+1, column = 11).value = resultTable[i]['NETAVAIL']
+            ws1.cell(row = i+1, column = 12).value = resultTable[i]['ALLOC_QTY']
+            ws1.cell(row = i+1, column = 13).value = resultTable[i]['BAL_TO_DESP']
+            ws1.cell(row = i+1, column = 14).value = resultTable[i]['EXCESS_COV']
+            ws1.cell(row = i+1, column = 15).value = resultTable[i]['EISBE']
+            ws1.cell(row = i+1, column = 16).value = resultTable[i]['MINBE']
+            ws1.cell(row = i+1, column = 17).value = resultTable[i]['BSTMI']
+            ws1.cell(row = i+1, column = 18).value = resultTable[i]['BSTMIL']
+
+    wb1.save("report/input/pws_"+name+".xlsx")
+    return True
+
+def pwsStart():
+    material_paste = [{'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600906'},
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600908'},
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600917'},
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600931'},
@@ -169,93 +255,324 @@ def getPwsData():
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00934A'},
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00932A'},
         {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00872A'}]
-        
-        fm_dict = {
-            'function_name':'Z1A_PWS_INDIA',
-            'connection': conn,
-            'import_args': {
-                'IT_PLANT': plant,
-                'IT_MATERIAL': material
-            }
-        }
-        # result = conn.call("Z1A_PWS_INDIA", IT_PLANT = plant, IT_MATERIAL = material)
-        result = fm_dict['connection'].call(fm_dict['function_name'], **fm_dict['import_args'])
-        # print(result['ET_EXCELTAB'])
-        resultTable = result['ET_EXCELTAB']
 
-        conn.close()
-    except CommunicationError:
-        print(u"Could not connect to server.")
-        raise
-    except LogonError:
-        print(u"Could not log in. Wrong credentials?")
-        raise
-    except (ABAPApplicationError, ABAPRuntimeError):
-        print(u"An error occurred.")
-        raise
-    finally:
-        conn.close()
+    resultTable_paste = getPwsData(material_paste)
+    res_paste = saveExcel(resultTable_paste, "paste")
 
-    # test dict
-    testdict = {
-        'MATNR': '0000000000AS16A1013', 'MAKTX': 'CDC TP 200+100+Tb', 'WERKS': 'IN95', 'GSBEST': '        0', 'MZUBB': '        0', 'IN_TRANSIT': '     1221', 'TOTPOTENTIAL': '        0', 'FKIMG': '        0', 
-        'LOSTSALES': ' 0', 'ON_HAND': '     4816', 'NETAVAIL': '     6037', 'ALLOC_QTY': '        0', 'BAL_TO_DESP': '        0', 'EXCESS_COV': '     6037', 'EISBE': '     1778', 'MINBE': '     5337', 'BSTMI': '     2810', 'BSTMIL': '        0'
-    }
-    # resultTable.append(testdict)
-    return resultTable
+    material_brush = [{'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608802'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608803'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608857'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611607'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611608'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611612'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601886'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608802'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608803'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1608857'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611603'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611607'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611608'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611612'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611631'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611634'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611638'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611639'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611640'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611642'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611824'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1611893'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1620004'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1620015'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1620016'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621802'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621820'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621825'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621834'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621835'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621836'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1621837'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00552A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00628A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00629A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00631A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00663A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00693A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00714A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00715A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00718A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00719A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00725A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00728A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00731A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00752A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00780A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00817A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00841A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00842A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00843A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00844A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00850A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00935A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00940A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00942A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00974A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00975A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00871A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01079A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01080A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01076A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01078A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01166A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01167A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01169A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01172A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01173A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01174A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01175A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01299A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01300A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607805'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607714'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607724'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607798'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607750'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607790'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607705'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607707'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607704'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607799'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00659A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH02054A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607715'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH02610A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01876A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01299A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01300A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000212'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000213'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000732'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000733'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000747'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01297A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01296A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002497'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61001746'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61001748'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002494'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002496'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61001794'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61001799'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000881'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000882'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607672'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002650'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004205'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004207'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004170'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004173'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61003765'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61003766'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002505'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61003202'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004204'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004208'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004217'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004494'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004496'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004495'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004215'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004216'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006080'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006081'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002499'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002501'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006079'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006074'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006076'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010040'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007772'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009820'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009336'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009342'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007940'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007941'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006716'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006717'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006720'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006721'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006723'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006724'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006725'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006719'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006718'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006731'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006730'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006728'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006729'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007924'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007926'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010962'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010964'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004717'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007217'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61011139'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61011159'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61011160'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61011972'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61011973'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013751'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013752'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006078'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006077'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61006078'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013686'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013687'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013741'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013742'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013743'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013744'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016058'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016059'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016060'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016061'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016062'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016063'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016064'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016065'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016669'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016670'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016671'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016672'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016082'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016083'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013987'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013986'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61015028'}]
 
-# save to excel
-def saveExcel(resultTable):
-    wb1 = Workbook()
-    ws1 = wb1.active
-    x = 1
-    for i in range(len(resultTable)):
-        if i!=0:
-            if resultTable[i]['MATNR'].isdigit():
-                ws1.cell(row = i+1, column = 1).value = int(resultTable[i]['MATNR'])
-            else:
-                ws1.cell(row = i+1, column = 1).value = resultTable[i]['MATNR']
-            ws1.cell(row = i+1, column = 2).value = resultTable[i]['MAKTX']
-            ws1.cell(row = i+1, column = 3).value = resultTable[i]['WERKS']
-            ws1.cell(row = i+1, column = 4).value = int(resultTable[i]['GSBEST'])
-            ws1.cell(row = i+1, column = 5).value = int(resultTable[i]['MZUBB'])
-            ws1.cell(row = i+1, column = 6).value = int(resultTable[i]['IN_TRANSIT'])
-            ws1.cell(row = i+1, column = 7).value = int(resultTable[i]['TOTPOTENTIAL'])
-            ws1.cell(row = i+1, column = 8).value = int(resultTable[i]['FKIMG'])
-            ws1.cell(row = i+1, column = 9).value = int(resultTable[i]['LOSTSALES'])
-            ws1.cell(row = i+1, column = 10).value = int(resultTable[i]['ON_HAND'])
-            ws1.cell(row = i+1, column = 11).value = int(resultTable[i]['NETAVAIL'])
-            ws1.cell(row = i+1, column = 12).value = int(resultTable[i]['ALLOC_QTY'])
-            ws1.cell(row = i+1, column = 13).value = int(resultTable[i]['BAL_TO_DESP'])
-            ws1.cell(row = i+1, column = 14).value = int(resultTable[i]['EXCESS_COV'])
-            ws1.cell(row = i+1, column = 15).value = int(resultTable[i]['EISBE'])
-            ws1.cell(row = i+1, column = 16).value = int(resultTable[i]['MINBE'])
-            ws1.cell(row = i+1, column = 17).value = int(resultTable[i]['BSTMI'])
-            ws1.cell(row = i+1, column = 18).value = int(resultTable[i]['BSTMIL'])
-        else:
-            ws1.cell(row = i+1, column = 1).value = resultTable[i]['MATNR']
-            ws1.cell(row = i+1, column = 2).value = resultTable[i]['MAKTX']
-            ws1.cell(row = i+1, column = 3).value = resultTable[i]['WERKS']
-            ws1.cell(row = i+1, column = 4).value = resultTable[i]['GSBEST']
-            ws1.cell(row = i+1, column = 5).value = resultTable[i]['MZUBB']
-            ws1.cell(row = i+1, column = 6).value = resultTable[i]['IN_TRANSIT']
-            ws1.cell(row = i+1, column = 7).value = resultTable[i]['TOTPOTENTIAL']
-            ws1.cell(row = i+1, column = 8).value = resultTable[i]['FKIMG']
-            ws1.cell(row = i+1, column = 9).value = resultTable[i]['LOSTSALES']
-            ws1.cell(row = i+1, column = 10).value = resultTable[i]['ON_HAND']
-            ws1.cell(row = i+1, column = 11).value = resultTable[i]['NETAVAIL']
-            ws1.cell(row = i+1, column = 12).value = resultTable[i]['ALLOC_QTY']
-            ws1.cell(row = i+1, column = 13).value = resultTable[i]['BAL_TO_DESP']
-            ws1.cell(row = i+1, column = 14).value = resultTable[i]['EXCESS_COV']
-            ws1.cell(row = i+1, column = 15).value = resultTable[i]['EISBE']
-            ws1.cell(row = i+1, column = 16).value = resultTable[i]['MINBE']
-            ws1.cell(row = i+1, column = 17).value = resultTable[i]['BSTMI']
-            ws1.cell(row = i+1, column = 18).value = resultTable[i]['BSTMIL']
+    resultTable_brush = getPwsData(material_brush)
+    res_brush = saveExcel(resultTable_brush, "brush")
 
-    wb1.save("report/input/pws.xlsx")
-    return True
+    material_other = [{'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600580'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600584'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600614'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600615'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600616'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1600617'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601319'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601339'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601379'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601382'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1601400'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1603205'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607672'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607675'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607679'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607704'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607705'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607707'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607714'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607715'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607724'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607750'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607790'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607798'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607799'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'1607805'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000414'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000811'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000812'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000831'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61000832'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61002484'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61004802'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005280'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005281'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005673'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005674'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005675'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61005676'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61007272'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008267'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008558'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008708'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008710'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008865'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008867'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008869'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61008879'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009361'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009365'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009366'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009505'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61009506'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61012175'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010204'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010206'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010209'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010210'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010211'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010218'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010219'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010221'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010222'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010223'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010543'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010544'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010545'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010557'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010558'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010559'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61010560'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013123'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013124'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013125'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013126'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013128'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013130'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013131'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013157'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013158'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013159'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61013160'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61015027'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61015382'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016049'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00659A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN01286A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01876A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01912A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01913A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01927A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01928A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH01995A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH02054A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH02584A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH02610A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH03374A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH03424A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH03425A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TH03760A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TR02125A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'TR02245A'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016030'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016031'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016042'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016044'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016848'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016849'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016850'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018252'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018322'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018323'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018324'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018325'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018326'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61018328'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016040'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'61016041'},
+        {'SIGN':'I', 'OPTION':'EQ', 'LOW':'IN00777A'}]
 
-def pwsStart():
-    resultTable = getPwsData()
-    res = saveExcel(resultTable)
-    return res
+    resultTable_other = getPwsData(material_other)
+    res_other = saveExcel(resultTable_other, "other")
+
+    return res_paste*res_brush*res_other
