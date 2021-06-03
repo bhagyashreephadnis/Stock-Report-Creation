@@ -15,7 +15,7 @@ def run_pws():
     # print('nice')
     result = pwsStart()
 
-@periodic_task(run_every=(crontab(hour=12, minute=54)), ignore_result=True)
+@periodic_task(run_every=(crontab(hour=8, minute=30)), ignore_result=True)
 def pws_task():
     run_pws.delay()
 
@@ -28,7 +28,7 @@ def logic(self, variant):
     #     res = startpoint(variant)
     #     progress_recorder.set_progress(i, 1, description="Processing")
     progress_recorder = ProgressRecorder(self)
-    print('here')
+    print('Started')
     if variant=="paste":
         wb1 = load_workbook('report/input/Base File (Paste).xlsx')
     elif variant=="brush":
@@ -71,11 +71,11 @@ def logic(self, variant):
     ws7.delete_cols(15)
     filename = datetime.date.today().strftime("%d%b%Y")
     if variant=="paste":
-        wb1.save('report/static/'+filename+' (Paste).xlsx')
+        wb1.save('report/output/'+filename+' (Paste).xlsx')
     elif variant=="brush":
-        wb1.save('report/static/'+filename+' (Brush).xlsx')
+        wb1.save('report/output/'+filename+' (Brush).xlsx')
     else:
-        wb1.save('report/static/'+filename+' (PCP).xlsx')
+        wb1.save('report/output/'+filename+' (PCP).xlsx')
     
     progress_recorder.set_progress(5, 5, description="Report Saved")
     # return True

@@ -138,8 +138,8 @@ def SAPRRP1ToWorking(wb1):
     mr3 = ws3.max_row
     
     c = 2
-    parentval = list(cell.value for cell in ws8['A'])[1:]
-    childval = list(cell.value for cell in ws8['B'])[1:]
+    parentval = list(cell.value for cell in ws8['A'] if cell.value is not None)[1:]
+    childval = list(cell.value for cell in ws8['B'] if cell.value is not None)[1:]
     # print(parentval, childval)
     parentdict = dict((l, [0, 0]) for l in parentval)
     childdict = dict((l, [0, 0]) for l in childval)
@@ -261,13 +261,14 @@ def SAPRRP1ToWorking(wb1):
         
         # wh name & branch
         for z in range(2, ws2.max_row+1):
-            if ws1.cell(row = i, column = 3).value==ws2.cell(row = z, column = 1).value:
-                # print('here')
-                ws1.cell(row = i, column = 22).value = ws2.cell(row = z, column = 2).value
-                ws1.cell(row = i, column = 23).value = ws2.cell(row = z, column = 3).value
-                ws5.cell(row = c, column = 18).value = ws2.cell(row = z, column = 2).value
-                ws5.cell(row = c, column = 19).value = ws2.cell(row = z, column = 3).value
-                break
+            if ws2.cell(row = z, column = 1).value!=None:
+                if ws1.cell(row = i, column = 3).value==ws2.cell(row = z, column = 1).value:
+                    # print('here')
+                    ws1.cell(row = i, column = 22).value = ws2.cell(row = z, column = 2).value
+                    ws1.cell(row = i, column = 23).value = ws2.cell(row = z, column = 3).value
+                    ws5.cell(row = c, column = 18).value = ws2.cell(row = z, column = 2).value
+                    ws5.cell(row = c, column = 19).value = ws2.cell(row = z, column = 3).value
+                    break
         
         # N E W S
         if ws1.cell(row = i, column = 23).value=="North" or ws1.cell(row = i, column = 23).value=="North DC":
@@ -289,9 +290,10 @@ def SAPRRP1ToWorking(wb1):
         
         # M+1 FC
         for z in range(2, ws4.max_row+1):
-            if str(str(ws1.cell(row = i, column = 1).value)+ws1.cell(row = i, column = 3).value)==str(ws4.cell(row = z, column = 1).value)+str(ws4.cell(row = z, column = 3).value):
-                ws1.cell(row = i, column = 25).value = round(ws4.cell(row = z, column = 5).value)
-                break
+            if ws4.cell(row=z, column=5).value!=None:
+                if str(str(ws1.cell(row = i, column = 1).value)+ws1.cell(row = i, column = 3).value)==str(ws4.cell(row = z, column = 1).value)+str(ws4.cell(row = z, column = 3).value):
+                    ws1.cell(row = i, column = 25).value = round(ws4.cell(row = z, column = 5).value)
+                    break
         if ws1.cell(row = i, column = 25).value is None:
             ws1.cell(row = i, column = 25).value = 0
         ws5.cell(row = c, column = 26).value = ws1.cell(row = i, column = 25).value
@@ -465,54 +467,55 @@ def ParentChildWh(wb1, index, oldindex):
     ws2 = wb1.worksheets[0]
     ws3 = wb1.worksheets[10]
     for i in range(2, ws1.max_row + 1):
-        parentind = index
-        oldparentind = oldindex
-        while ws2.cell(row = parentind, column = 3).value != ws1.cell(row = i, column = 1).value:
-            parentind -= 1
-            oldparentind -= 1
-        childind = parentind
-        oldchildind = oldparentind
-        if ws1.cell(row = i, column = 1).value > ws1.cell(row = i, column = 2).value:
-            while ws2.cell(row = childind, column = 3).value != ws1.cell(row = i, column = 2).value:
-                # print(ws2.cell(row = childind, column = 3).value, ws1.cell(row = i, column = 2).value)
-                childind -= 1
-                oldchildind -= 1
-        else:
-            while ws2.cell(row = childind, column = 3).value < ws1.cell(row = i, column = 2).value and childind<index and oldchildind<oldindex:
-                # print(ws2.cell(row = childind, column = 3).value, ws1.cell(row = i, column = 2).value)
-                # print(val)
-                childind += 1
-                oldchildind += 1
-        # working
-        if ws2.cell(row = childind, column = 3).value == ws1.cell(row = i, column = 2).value and ws2.cell(row = parentind, column = 3).value == ws1.cell(row = i, column = 1).value:
-            ws2.cell(row = parentind, column = 4).value += ws2.cell(row = childind, column = 4).value
-            ws2.cell(row = parentind, column = 5).value += ws2.cell(row = childind, column = 5).value
-            ws2.cell(row = parentind, column = 6).value += ws2.cell(row = childind, column = 6).value
-            ws2.cell(row = parentind, column = 7).value += ws2.cell(row = childind, column = 7).value
-            ws2.cell(row = parentind, column = 8).value += ws2.cell(row = childind, column = 8).value
-            ws2.cell(row = parentind, column = 9).value += ws2.cell(row = childind, column = 9).value
-            ws2.cell(row = parentind, column = 10).value += ws2.cell(row = childind, column = 10).value
-            ws2.cell(row = parentind, column = 11).value = ws2.cell(row = parentind, column = 4).value + ws2.cell(row = parentind, column = 6).value + ws2.cell(row = parentind, column = 8).value - ws2.cell(row = parentind, column = 10).value
+        if ws1.cell(row=i, column=1).value!=None:
+            parentind = index
+            oldparentind = oldindex
+            while ws2.cell(row = parentind, column = 3).value != ws1.cell(row = i, column = 1).value:
+                parentind -= 1
+                oldparentind -= 1
+            childind = parentind
+            oldchildind = oldparentind
+            if ws1.cell(row = i, column = 1).value > ws1.cell(row = i, column = 2).value:
+                while ws2.cell(row = childind, column = 3).value != ws1.cell(row = i, column = 2).value:
+                    # print(ws2.cell(row = childind, column = 3).value, ws1.cell(row = i, column = 2).value)
+                    childind -= 1
+                    oldchildind -= 1
+            else:
+                while ws2.cell(row = childind, column = 3).value < ws1.cell(row = i, column = 2).value and childind<index and oldchildind<oldindex:
+                    # print(ws2.cell(row = childind, column = 3).value, ws1.cell(row = i, column = 2).value)
+                    # print(val)
+                    childind += 1
+                    oldchildind += 1
+            # working
+            if ws2.cell(row = childind, column = 3).value == ws1.cell(row = i, column = 2).value and ws2.cell(row = parentind, column = 3).value == ws1.cell(row = i, column = 1).value:
+                ws2.cell(row = parentind, column = 4).value += ws2.cell(row = childind, column = 4).value
+                ws2.cell(row = parentind, column = 5).value += ws2.cell(row = childind, column = 5).value
+                ws2.cell(row = parentind, column = 6).value += ws2.cell(row = childind, column = 6).value
+                ws2.cell(row = parentind, column = 7).value += ws2.cell(row = childind, column = 7).value
+                ws2.cell(row = parentind, column = 8).value += ws2.cell(row = childind, column = 8).value
+                ws2.cell(row = parentind, column = 9).value += ws2.cell(row = childind, column = 9).value
+                ws2.cell(row = parentind, column = 10).value += ws2.cell(row = childind, column = 10).value
+                ws2.cell(row = parentind, column = 11).value = ws2.cell(row = parentind, column = 4).value + ws2.cell(row = parentind, column = 6).value + ws2.cell(row = parentind, column = 8).value - ws2.cell(row = parentind, column = 10).value
 
-            # styling
-            ws2.cell(row = parentind, column = 4).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00C5D9F1'))
-            ws2.cell(row = parentind, column = 6).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='008DB4E2'))
-            ws2.cell(row = parentind, column = 8).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00D8E4BC'))
-            ws2.cell(row = parentind, column = 10).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00BFBFBF'))
+                # styling
+                ws2.cell(row = parentind, column = 4).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00C5D9F1'))
+                ws2.cell(row = parentind, column = 6).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='008DB4E2'))
+                ws2.cell(row = parentind, column = 8).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00D8E4BC'))
+                ws2.cell(row = parentind, column = 10).fill = openpyxl.styles.fills.PatternFill(patternType='solid', fgColor = openpyxl.styles.colors.Color(rgb='00BFBFBF'))
 
-        # old working
-        if ws3.cell(row = oldchildind, column = 3).value == ws1.cell(row = i, column = 2).value and ws3.cell(row = oldparentind, column = 3).value == ws1.cell(row = i, column = 1).value:
-            ws3.cell(row = oldparentind, column = 6).value += ws3.cell(row = oldchildind, column = 6).value
-            ws3.cell(row = oldparentind, column = 7).value += ws3.cell(row = oldchildind, column = 7).value
-            ws3.cell(row = oldparentind, column = 8).value += ws3.cell(row = oldchildind, column = 8).value
-            ws3.cell(row = oldparentind, column = 9).value += ws3.cell(row = oldchildind, column = 9).value
-            ws3.cell(row = oldparentind, column = 10).value += ws3.cell(row = oldchildind, column = 10).value
-            ws3.cell(row = oldparentind, column = 11).value += ws3.cell(row = oldchildind, column = 11).value
-            ws3.cell(row = oldparentind, column = 12).value += ws3.cell(row = oldchildind, column = 12).value
-            ws3.cell(row = oldparentind, column = 14).value = ws3.cell(row = oldparentind, column = 6).value + ws3.cell(row = oldparentind, column = 8).value + ws3.cell(row = oldparentind, column = 10).value - ws3.cell(row = oldparentind, column = 12).value
+            # old working
+            if ws3.cell(row = oldchildind, column = 3).value == ws1.cell(row = i, column = 2).value and ws3.cell(row = oldparentind, column = 3).value == ws1.cell(row = i, column = 1).value:
+                ws3.cell(row = oldparentind, column = 6).value += ws3.cell(row = oldchildind, column = 6).value
+                ws3.cell(row = oldparentind, column = 7).value += ws3.cell(row = oldchildind, column = 7).value
+                ws3.cell(row = oldparentind, column = 8).value += ws3.cell(row = oldchildind, column = 8).value
+                ws3.cell(row = oldparentind, column = 9).value += ws3.cell(row = oldchildind, column = 9).value
+                ws3.cell(row = oldparentind, column = 10).value += ws3.cell(row = oldchildind, column = 10).value
+                ws3.cell(row = oldparentind, column = 11).value += ws3.cell(row = oldchildind, column = 11).value
+                ws3.cell(row = oldparentind, column = 12).value += ws3.cell(row = oldchildind, column = 12).value
+                ws3.cell(row = oldparentind, column = 14).value = ws3.cell(row = oldparentind, column = 6).value + ws3.cell(row = oldparentind, column = 8).value + ws3.cell(row = oldparentind, column = 10).value - ws3.cell(row = oldparentind, column = 12).value
 
 def startpoint(variant):
-    print('here')
+    print('Started')
     if variant=="paste":
         wb1 = load_workbook('report/input/Base File (Paste).xlsx')
     elif variant=="brush":
@@ -550,9 +553,9 @@ def startpoint(variant):
     ws7.delete_cols(15)
     filename = datetime.date.today().strftime("%d%b%Y")
     if variant=="paste":
-        wb1.save('report/static/'+filename+' (Paste).xlsx')
+        wb1.save('report/output/'+filename+' (Paste).xlsx')
     elif variant=="brush":
-        wb1.save('report/static/'+filename+' (Brush).xlsx')
+        wb1.save('report/output/'+filename+' (Brush).xlsx')
     else:
-        wb1.save('report/static/'+filename+' (PCP).xlsx')
+        wb1.save('report/output/'+filename+' (PCP).xlsx')
     return True
