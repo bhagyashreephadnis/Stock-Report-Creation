@@ -4,7 +4,7 @@ from openpyxl import Workbook
 
 def getPwsData(material):
     try:
-        conn = Connection(user='INBHP002', ashost='CAIapp07.esc.win.colpal.com', sysnr='07', client='321', passwd='Bdp@251299')
+        conn = Connection(user='INBHP002', ashost='CAIapp07.esc.win.colpal.com', sysnr='07', client='321', passwd='Bp@251299')
         print(conn.alive)
         plant = [{'SIGN':'I',  'OPTION':'EQ', 'LOW':'IN08'},
         {'SIGN':'I',  'OPTION':'EQ', 'LOW':'IN15'},
